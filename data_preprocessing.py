@@ -5,6 +5,7 @@ df = pd.read_csv('weatherHistory.csv')
 if __name__ == '__main__':
     print(df.head())
     print(df.columns)
+    print(df.nunique)
     print('\n', df.dtypes)
     print('\n', df.Summary.unique())
 
@@ -20,7 +21,10 @@ if __name__ == '__main__':
     print("Liczba duplikatów:", duplicate_count)
     duplicate_rows = df[df.duplicated()]
     print(duplicate_rows)
+    test = df[df['Humidity'] == 0]
+    print(test)
 
+df = df.sort_values(by='Formatted Date')
 df = df.drop_duplicates()
 
 df.reset_index(drop=True, inplace=True)
@@ -38,21 +42,22 @@ df['encode_day'] = df['Formatted Date'].dt.month + df[
     'Formatted Date'].dt.day / 100
 df['encode_season'] = df['Formatted Date'].dt.month + df[
     'Formatted Date'].dt.day / 100
-df['encode_season_1'] = df['encode_season'].apply(lambda x: (
-    1 if 1 <= x <= 3.19 else
-    2 if 3.20 <= x <= 6.20 else
-    3 if 6.21 <= x <= 9.21 else
-    4 if 9.22 <= x <= 12.20 else
-    1  # Grudzień (12)
-))
-df['encode_season_2'] = df['encode_season'].apply(lambda x: (
+df['encode_season_calendar'] = df['encode_season'].apply(lambda x: (
     1 if 1 <= x <= 2 else
     2 if 3 <= x <= 5 else
     3 if 6 <= x <= 8 else
     4 if 9 <= x <= 11 else
     1  # Grudzień (12)
 ))
-df['encode_season_3'] = df['encode_season'].apply(lambda x: (
+df['encode_season_astronomical'] = df['encode_season'].apply(lambda x: (
+    1 if 1 <= x <= 3.19 else
+    2 if 3.20 <= x <= 6.20 else
+    3 if 6.21 <= x <= 9.21 else
+    4 if 9.22 <= x <= 12.20 else
+    1  # Grudzień (12)
+))
+
+df['encode_season_not_accurate'] = df['encode_season'].apply(lambda x: (
     1 if 1 <= x <= 3 else
     2 if 4 <= x <= 6 else
     3 if 7 <= x <= 9 else
@@ -64,9 +69,8 @@ df['encode_season_3'] = df['encode_season'].apply(lambda x: (
 # Usuń zbędne kolumny
 df = df.drop(columns=['Loud Cover', 'Daily Summary', 'Apparent Temperature (C)',
                       'Summary', 'Precip Type'])
-df = df.drop(columns=['encode_season_1', 'encode_season_2'])
+df = df.drop(columns=['encode_season_astronomical', 'encode_season_not_accurate'])
+df['encode_season'] = df['encode_season_calendar']
 
-y = df['Temperature (C)']
-X = df.drop('Temperature (C)', axis=1)
 
 
